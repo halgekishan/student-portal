@@ -1,0 +1,37 @@
+{% extends 'portal/base.html' %}
+{% load portal_tags %}
+{% block title %}Timetable{% endblock %}
+{% block page_title %}My Timetable{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header py-3"><i class="bi bi-calendar-week me-2"></i>Weekly Timetable</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>{% for day in days %}<th class="text-center" style="min-width:140px;">{{ day }}</th>{% endfor %}</tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        {% for day in days %}
+                        <td style="vertical-align:top;padding:10px;">
+                            {% with entries=timetable_by_day|dict_key:day %}
+                            {% for entry in entries %}
+                            <div class="p-2 mb-1 rounded" style="background:#e8f5ee;border-left:3px solid #1a7a3e;">
+                                <div class="fw-bold small">{{ entry.subject.name }}</div>
+                                <div class="text-muted" style="font-size:0.75rem;">{{ entry.start_time|time:"H:i" }} - {{ entry.end_time|time:"H:i" }}</div>
+                                {% if entry.teacher %}<div class="text-muted" style="font-size:0.75rem;"><i class="bi bi-person"></i> {{ entry.teacher.user.get_full_name }}</div>{% endif %}
+                            </div>
+                            {% empty %}
+                            <div class="text-muted small text-center p-2">-</div>
+                            {% endfor %}
+                            {% endwith %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

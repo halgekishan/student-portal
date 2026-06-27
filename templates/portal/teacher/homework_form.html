@@ -1,0 +1,18 @@
+{% extends 'portal/base.html' %}
+{% block title %}Assign Homework{% endblock %}
+{% block page_title %}Assign Homework{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header py-3"><i class="bi bi-journal-plus me-2"></i>Assign Homework</div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">{% csrf_token %}
+                    {% for field in form %}<div class="mb-3"><label class="form-label fw-semibold">{{ field.label }}</label>{{ field }}</div>{% endfor %}
+                    <button type="submit" class="btn btn-zpps px-4"><i class="bi bi-send me-2"></i>Assign</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

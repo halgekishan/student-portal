@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZPPS School Portal - {% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root { --zpps-green: #1a7a3e; --zpps-light: #e8f5ee; --zpps-dark: #0d4a25; --sidebar-width: 260px; }
+        body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        .sidebar { width: var(--sidebar-width); height: 100vh; background: linear-gradient(180deg, var(--zpps-dark) 0%, var(--zpps-green) 100%); position: fixed; top: 0; left: 0; z-index: 1000; overflow-y: auto; overflow-x: hidden; }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 4px; }
+        .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.45); }
+        .sidebar-brand { padding: 20px 15px; border-bottom: 1px solid rgba(255,255,255,0.15); }
+        .sidebar-brand h5 { color: #fff; font-weight: 700; margin: 0; font-size: 1rem; }
+        .sidebar-brand small { color: rgba(255,255,255,0.7); font-size: 0.75rem; }
+        .sidebar .nav-link { color: rgba(255,255,255,0.8); padding: 10px 20px; border-radius: 8px; margin: 2px 10px; transition: all 0.2s; font-size: 0.88rem; }
+        .sidebar .nav-link:hover { background: rgba(255,255,255,0.15); color: #fff; }
+        .sidebar .nav-link i { width: 20px; margin-right: 8px; }
+        .nav-section { color: rgba(255,255,255,0.45); font-size: 0.68rem; text-transform: uppercase; padding: 12px 20px 4px; letter-spacing: 1px; }
+        .main-content { margin-left: var(--sidebar-width); }
+        .topbar { background: #fff; padding: 12px 25px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .topbar h6 { margin: 0; font-weight: 600; color: #333; }
+        .page-body { padding: 25px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .card-header { background: #fff; border-bottom: 1px solid #f0f0f0; font-weight: 600; border-radius: 12px 12px 0 0 !important; }
+        .stat-card { border-radius: 12px; padding: 20px; color: #fff; position: relative; overflow: hidden; }
+        .stat-card .stat-icon { font-size: 2.5rem; opacity: 0.25; position: absolute; right: 15px; top: 15px; }
+        .stat-card h3 { font-size: 2rem; font-weight: 700; margin: 0; }
+        .stat-card p { margin: 5px 0 0; opacity: 0.85; font-size: 0.85rem; }
+        .table-hover tbody tr:hover { background: var(--zpps-light); }
+        .btn-zpps { background: var(--zpps-green); color: #fff; border: none; }
+        .btn-zpps:hover { background: var(--zpps-dark); color: #fff; }
+        .priority-H { border-left: 4px solid #dc3545; }
+        .priority-M { border-left: 4px solid #ffc107; }
+        .priority-L { border-left: 4px solid #198754; }
+        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .sidebar.show { transform: translateX(0); } .main-content { margin-left: 0; } }
+    </style>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="d-flex align-items-center gap-2">
+            <div style="background:rgba(255,255,255,0.2);border-radius:8px;padding:8px;">
+                <i class="bi bi-mortarboard-fill text-white fs-5"></i>
+            </div>
+            <div><h5>ZPPS School</h5><small>Student Portal</small></div>
+        </div>
+    </div>
+    {% if user.is_authenticated %}
+    <div class="p-3">
+        <div class="d-flex align-items-center gap-2 p-2" style="background:rgba(255,255,255,0.1);border-radius:8px;">
+            <div style="background:rgba(255,255,255,0.3);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-person-fill text-white"></i>
+            </div>
+            <div>
+                <div style="color:#fff;font-size:0.85rem;font-weight:600;">{{ user.get_full_name|default:user.username }}</div>
+                <div style="color:rgba(255,255,255,0.6);font-size:0.7rem;">
+                    {% if user.is_superuser %}Admin{% else %}{% if user.teacher %}Teacher{% else %}{% if user.student %}Student{% else %}{% if user.parent %}Parent{% endif %}{% endif %}{% endif %}{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <ul class="nav flex-column px-1 pb-4">
+        <li><a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+
+        {% if user.is_superuser %}
+        <li><div class="nav-section">Administration</div></li>
+        <li><a class="nav-link" href="{% url 'manage_students' %}"><i class="bi bi-people-fill"></i> Students</a></li>
+        <li><a class="nav-link" href="{% url 'manage_teachers' %}"><i class="bi bi-person-workspace"></i> Teachers</a></li>
+        <li><a class="nav-link" href="{% url 'manage_classes' %}"><i class="bi bi-building"></i> Classes</a></li>
+        <li><a class="nav-link" href="{% url 'manage_subjects' %}"><i class="bi bi-book-fill"></i> Subjects</a></li>
+        <li><a class="nav-link" href="{% url 'view_timetable' %}"><i class="bi bi-calendar3"></i> Timetable</a></li>
+        <li><a class="nav-link" href="{% url 'manage_fees' %}"><i class="bi bi-cash-coin"></i> Fees</a></li>
+        <li><a class="nav-link" href="{% url 'library' %}"><i class="bi bi-journal-bookmark-fill"></i> Library</a></li>
+        <li><a class="nav-link" href="{% url 'homework' %}"><i class="bi bi-journal-text"></i> Homework</a></li>
+        <li><a class="nav-link" href="{% url 'class_tests' %}"><i class="bi bi-clipboard-data"></i> Tests</a></li>
+        <li><a class="nav-link" href="{% url 'all_progress' %}"><i class="bi bi-graph-up"></i> Progress Reports</a></li>
+        {% endif %}
+
+        {% if user.teacher %}
+        <li><div class="nav-section">Teacher Menu</div></li>
+        <li><a class="nav-link" href="{% url 'mark_attendance' %}"><i class="bi bi-check2-circle"></i> Mark Attendance</a></li>
+        <li><a class="nav-link" href="{% url 'view_attendance' %}"><i class="bi bi-eye-fill"></i> View Attendance</a></li>
+        <li><a class="nav-link" href="{% url 'enter_marks' %}"><i class="bi bi-pencil-fill"></i> Enter Marks</a></li>
+        <li><a class="nav-link" href="{% url 'add_homework' %}"><i class="bi bi-journal-plus"></i> Assign Homework</a></li>
+        <li><a class="nav-link" href="{% url 'create_test' %}"><i class="bi bi-clipboard-plus"></i> Create Test</a></li>
+        <li><a class="nav-link" href="{% url 'class_tests' %}"><i class="bi bi-clipboard-data"></i> My Tests</a></li>
+        {% endif %}
+
+        {% if user.student %}
+        <li><div class="nav-section">Student Menu</div></li>
+        <li><a class="nav-link" href="{% url 'student_profile' %}"><i class="bi bi-person-circle"></i> My Profile</a></li>
+        <li><a class="nav-link" href="{% url 'view_attendance' %}"><i class="bi bi-calendar-check-fill"></i> Attendance</a></li>
+        <li><a class="nav-link" href="{% url 'view_marks' %}"><i class="bi bi-bar-chart-fill"></i> My Marks</a></li>
+        <li><a class="nav-link" href="{% url 'view_timetable' %}"><i class="bi bi-calendar3"></i> Timetable</a></li>
+        <li><a class="nav-link" href="{% url 'manage_fees' %}"><i class="bi bi-receipt"></i> Fee Status</a></li>
+        <li><a class="nav-link" href="{% url 'class_tests' %}"><i class="bi bi-clipboard-check"></i> Class Tests</a></li>
+        <li><a class="nav-link" href="{% url 'homework' %}"><i class="bi bi-journal-text"></i> Homework</a></li>
+        <li><a class="nav-link" href="{% url 'library' %}"><i class="bi bi-journal-bookmark"></i> Library</a></li>
+        <li><a class="nav-link" href="{% url 'progress_report' %}"><i class="bi bi-graph-up"></i> Progress Report</a></li>
+        {% endif %}
+
+        {% if user.parent %}
+        <li><div class="nav-section">Parent Menu</div></li>
+        <li><a class="nav-link" href="{% url 'student_profile' %}"><i class="bi bi-person-lines-fill"></i> Child Profile</a></li>
+        <li><a class="nav-link" href="{% url 'view_attendance' %}"><i class="bi bi-calendar-check-fill"></i> Attendance</a></li>
+        <li><a class="nav-link" href="{% url 'view_marks' %}"><i class="bi bi-bar-chart-fill"></i> Marks</a></li>
+        <li><a class="nav-link" href="{% url 'view_timetable' %}"><i class="bi bi-calendar3"></i> Timetable</a></li>
+        <li><a class="nav-link" href="{% url 'manage_fees' %}"><i class="bi bi-receipt"></i> Fee Status</a></li>
+        <li><a class="nav-link" href="{% url 'homework' %}"><i class="bi bi-journal-text"></i> Homework</a></li>
+        <li><a class="nav-link" href="{% url 'progress_report' %}"><i class="bi bi-graph-up"></i> Progress Report</a></li>
+        {% endif %}
+
+        <li><div class="nav-section">General</div></li>
+        <li><a class="nav-link" href="{% url 'notice_board' %}"><i class="bi bi-bell-fill"></i> Notice Board</a></li>
+        <li><a class="nav-link" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+    </ul>
+    {% endif %}
+</nav>
+
+<div class="main-content">
+    <div class="topbar">
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-sm d-md-none border-0" onclick="document.getElementById('sidebar').classList.toggle('show')">
+                <i class="bi bi-list fs-5"></i>
+            </button>
+            <h6>{% block page_title %}ZPPS Portal{% endblock %}</h6>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{% url 'notice_board' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-bell"></i></a>
+            <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </div>
+    </div>
+    <div class="page-body">
+        {% if messages %}{% for msg in messages %}
+        <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+            {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}{% endif %}
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

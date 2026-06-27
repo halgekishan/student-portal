@@ -1,0 +1,43 @@
+{% extends 'portal/base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}Student Profile{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body p-4">
+                {% if student.photo %}
+                <img src="{{ student.photo.url }}" width="120" height="120" class="rounded-circle mb-3" style="object-fit:cover;">
+                {% else %}
+                <div class="mx-auto mb-3" style="width:120px;height:120px;background:#e8f5ee;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-person-fill text-success" style="font-size:3rem;"></i>
+                </div>
+                {% endif %}
+                <h5 class="fw-bold">{{ student.user.get_full_name }}</h5>
+                <span class="badge bg-success mb-2">{{ student.student_class }}</span>
+                <div class="text-muted small">Roll No: {{ student.roll_number }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header py-3"><i class="bi bi-info-circle me-2"></i>Personal Details</div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr><td class="fw-semibold text-muted" width="40%">Full Name</td><td>{{ student.user.get_full_name }}</td></tr>
+                    <tr><td class="fw-semibold text-muted">Roll Number</td><td>{{ student.roll_number }}</td></tr>
+                    <tr><td class="fw-semibold text-muted">Class</td><td>{{ student.student_class }}</td></tr>
+                    <tr><td class="fw-semibold text-muted">Date of Birth</td><td>{{ student.date_of_birth }}</td></tr>
+                    <tr><td class="fw-semibold text-muted">Gender</td><td>{{ student.get_gender_display }}</td></tr>
+                    <tr><td class="fw-semibold text-muted">Phone</td><td>{{ student.phone|default:"N/A" }}</td></tr>
+                    <tr><td class="fw-semibold text-muted">Email</td><td>{{ student.user.email|default:"N/A" }}</td></tr>
+                    <tr><td class="fw-semibold text-muted">Address</td><td>{{ student.address|default:"N/A" }}</td></tr>
+                    <tr><td class="fw-semibold text-muted">Parent Name</td><td>{{ student.parent_name }}</td></tr>
+                    <tr><td class="fw-semibold text-muted">Parent Phone</td><td>{{ student.parent_phone }}</td></tr>
+                    <tr><td class="fw-semibold text-muted">Admission Date</td><td>{{ student.admission_date }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

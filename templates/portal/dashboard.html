@@ -1,0 +1,258 @@
+{% extends 'portal/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+{% if role == 'admin' %}
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#1a7a3e,#27ae60)">
+            <i class="bi bi-people-fill stat-icon"></i>
+            <h3>{{ total_students }}</h3>
+            <p><i class="bi bi-people"></i> Total Students</p>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#0d6efd,#4d9fff)">
+            <i class="bi bi-person-workspace stat-icon"></i>
+            <h3>{{ total_teachers }}</h3>
+            <p><i class="bi bi-person-workspace"></i> Total Teachers</p>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#fd7e14,#ffaa5c)">
+            <i class="bi bi-building stat-icon"></i>
+            <h3>{{ total_classes }}</h3>
+            <p><i class="bi bi-building"></i> Total Classes</p>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#dc3545,#ff6b7a)">
+            <i class="bi bi-exclamation-triangle stat-icon"></i>
+            <h3>{{ unpaid_fees }}</h3>
+            <p><i class="bi bi-cash-coin"></i> Unpaid Fees</p>
+        </div>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center py-3">
+                <span><i class="bi bi-bell me-2"></i>Recent Notices</span>
+                <a href="{% url 'add_notice' %}" class="btn btn-sm btn-zpps">+ Add Notice</a>
+            </div>
+            <div class="card-body p-0">
+                {% for notice in recent_notices %}
+                <div class="p-3 border-bottom priority-{{ notice.priority }}">
+                    <div class="d-flex justify-content-between">
+                        <strong>{{ notice.title }}</strong>
+                        <small class="text-muted">{{ notice.posted_on|date:"d M Y" }}</small>
+                    </div>
+                    <small class="text-muted">{{ notice.content|truncatewords:20 }}</small>
+                </div>
+                {% empty %}<div class="p-3 text-muted">No notices yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header py-3"><i class="bi bi-lightning me-2"></i>Quick Actions</div>
+            <div class="card-body d-grid gap-2">
+                <a href="{% url 'add_student' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-person-plus me-2"></i>Add Student</a>
+                <a href="{% url 'add_teacher' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-person-badge me-2"></i>Add Teacher</a>
+                <a href="{% url 'add_class' %}" class="btn btn-outline-warning btn-sm"><i class="bi bi-building-add me-2"></i>Add Class</a>
+                <a href="{% url 'add_notice' %}" class="btn btn-outline-info btn-sm"><i class="bi bi-bell-plus me-2"></i>Post Notice</a>
+                <a href="{% url 'add_fee' %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-cash-coin me-2"></i>Add Fee</a>
+                <a href="{% url 'add_book' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-book-half me-2"></i>Add Book</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% elif role == 'student' %}
+<div class="mb-3">
+    <h5>Welcome, <strong>{{ student.user.get_full_name }}</strong>! 👋</h5>
+    <small class="text-muted">{{ student.student_class }} | Roll No: {{ student.roll_number }}</small>
+</div>
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#1a7a3e,#27ae60)">
+            <i class="bi bi-calendar-check stat-icon"></i>
+            <h3>{{ attendance_pct }}%</h3>
+            <p>Attendance</p>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#0d6efd,#4d9fff)">
+            <i class="bi bi-journal-text stat-icon"></i>
+            <h3>{{ pending_homeworks }}</h3>
+            <p>Pending HW</p>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#fd7e14,#ffaa5c)">
+            <i class="bi bi-clipboard stat-icon"></i>
+            <h3>{{ active_tests }}</h3>
+            <p>Active Tests</p>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background:{% if fee_dues > 0 %}linear-gradient(135deg,#dc3545,#ff6b7a){% else %}linear-gradient(135deg,#198754,#20c997){% endif %}">
+            <i class="bi bi-cash stat-icon"></i>
+            <h3>{{ fee_dues }}</h3>
+            <p>Fee Dues</p>
+        </div>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header py-3"><i class="bi bi-bar-chart me-2"></i>Recent Marks</div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light"><tr><th>Subject</th><th>Exam</th><th>Marks</th><th>Grade</th></tr></thead>
+                    <tbody>
+                        {% for mark in recent_marks %}
+                        <tr>
+                            <td>{{ mark.subject.name }}</td>
+                            <td>{{ mark.exam_type }}</td>
+                            <td>{{ mark.marks_obtained }}/{{ mark.max_marks }}</td>
+                            <td><span class="badge bg-{% if mark.grade == 'A+' or mark.grade == 'A' %}success{% elif mark.grade == 'F' %}danger{% else %}warning{% endif %}">{{ mark.grade }}</span></td>
+                        </tr>
+                        {% empty %}<tr><td colspan="4" class="text-center text-muted p-3">No marks yet</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header py-3"><i class="bi bi-bell me-2"></i>Notices</div>
+            <div class="card-body p-0">
+                {% for notice in recent_notices %}
+                <div class="p-3 border-bottom priority-{{ notice.priority }}">
+                    <strong class="d-block" style="font-size:0.9rem;">{{ notice.title }}</strong>
+                    <small class="text-muted">{{ notice.posted_on|date:"d M Y" }}</small>
+                </div>
+                {% empty %}<div class="p-3 text-muted">No notices</div>
+                {% endfor %}
+                <div class="p-2 text-center"><a href="{% url 'notice_board' %}" class="btn btn-sm btn-zpps">View All</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% elif role == 'teacher' %}
+<div class="mb-3">
+    <h5>Welcome, <strong>{{ teacher.user.get_full_name }}</strong>! 👋</h5>
+    <small class="text-muted">{{ teacher.subject }} Teacher | EMP ID: {{ teacher.employee_id }}</small>
+</div>
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#0d6efd,#4d9fff)">
+            <i class="bi bi-building stat-icon"></i>
+            <h3>{{ my_classes.count }}</h3><p>My Classes</p>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#198754,#20c997)">
+            <i class="bi bi-journal stat-icon"></i>
+            <h3>{{ pending_homeworks }}</h3><p>Homeworks Given</p>
+        </div>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header py-3"><i class="bi bi-lightning me-2"></i>Quick Actions</div>
+            <div class="card-body d-grid gap-2">
+                <a href="{% url 'mark_attendance' %}" class="btn btn-outline-success"><i class="bi bi-check2-circle me-2"></i>Mark Attendance</a>
+                <a href="{% url 'enter_marks' %}" class="btn btn-outline-primary"><i class="bi bi-pencil me-2"></i>Enter Marks</a>
+                <a href="{% url 'add_homework' %}" class="btn btn-outline-warning"><i class="bi bi-journal-plus me-2"></i>Assign Homework</a>
+                <a href="{% url 'create_test' %}" class="btn btn-outline-info"><i class="bi bi-clipboard-plus me-2"></i>Create Test</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header py-3"><i class="bi bi-bell me-2"></i>Notices</div>
+            <div class="card-body p-0">
+                {% for notice in recent_notices %}
+                <div class="p-3 border-bottom priority-{{ notice.priority }}">
+                    <strong class="d-block" style="font-size:0.9rem;">{{ notice.title }}</strong>
+                    <small class="text-muted">{{ notice.posted_on|date:"d M Y" }}</small>
+                </div>
+                {% empty %}<div class="p-3 text-muted">No notices</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% elif role == 'parent' %}
+<div class="mb-3">
+    <h5>Welcome, <strong>{{ parent.user.get_full_name }}</strong>! 👋</h5>
+    <small class="text-muted">Parent of: {{ student.user.get_full_name }} | {{ student.student_class }}</small>
+</div>
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#1a7a3e,#27ae60)">
+            <i class="bi bi-calendar-check stat-icon"></i>
+            <h3>{{ attendance_pct }}%</h3><p>Attendance</p>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="stat-card" style="background:{% if fee_dues.count > 0 %}linear-gradient(135deg,#dc3545,#ff6b7a){% else %}linear-gradient(135deg,#198754,#20c997){% endif %}">
+            <i class="bi bi-cash stat-icon"></i>
+            <h3>{{ fee_dues.count }}</h3><p>Pending Fees</p>
+        </div>
+    </div>
+</div>
+{% if fee_dues %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <strong>Fee Pending!</strong> Please clear {{ fee_dues.count }} pending fee(s).
+    <a href="{% url 'manage_fees' %}" class="btn btn-sm btn-warning ms-2">View Fees</a>
+</div>
+{% endif %}
+<div class="row g-4">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header py-3"><i class="bi bi-bar-chart me-2"></i>Recent Marks</div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light"><tr><th>Subject</th><th>Exam</th><th>Marks</th><th>Grade</th></tr></thead>
+                    <tbody>
+                        {% for mark in recent_marks %}
+                        <tr>
+                            <td>{{ mark.subject.name }}</td>
+                            <td>{{ mark.exam_type }}</td>
+                            <td>{{ mark.marks_obtained }}/{{ mark.max_marks }}</td>
+                            <td><span class="badge bg-{% if mark.grade == 'A+' or mark.grade == 'A' %}success{% elif mark.grade == 'F' %}danger{% else %}warning{% endif %}">{{ mark.grade }}</span></td>
+                        </tr>
+                        {% empty %}<tr><td colspan="4" class="text-center text-muted p-3">No marks yet</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header py-3"><i class="bi bi-bell me-2"></i>Notices</div>
+            <div class="card-body p-0">
+                {% for notice in recent_notices %}
+                <div class="p-3 border-bottom priority-{{ notice.priority }}">
+                    <strong class="d-block" style="font-size:0.9rem;">{{ notice.title }}</strong>
+                    <small class="text-muted">{{ notice.posted_on|date:"d M Y" }}</small>
+                </div>
+                {% empty %}<div class="p-3 text-muted">No notices</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

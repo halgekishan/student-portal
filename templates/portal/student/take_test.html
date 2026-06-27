@@ -1,0 +1,74 @@
+{% extends 'portal/base.html' %}
+{% block title %}Take Test{% endblock %}
+{% block page_title %}{{ test.title }}{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center py-3">
+                <span><i class="bi bi-clipboard me-2"></i>{{ test.title }}</span>
+                <div>
+                    <span class="badge bg-primary me-2">{{ test.subject }}</span>
+                    <span class="badge bg-warning text-dark" id="timer">Loading...</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="post" id="testForm">{% csrf_token %}
+                    {% for q in questions %}
+                    <div class="card mb-3 border-0 bg-light">
+                        <div class="card-body">
+                            <p class="fw-semibold mb-3"><span class="badge bg-primary me-2">Q{{ forloop.counter }}</span>{{ q.question_text }} <small class="text-muted">({{ q.marks }} mark)</small></p>
+                            {% for opt, label in q.option_a|zip_options:q %}
+                            {% endfor %}
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <div class="form-check p-3 rounded border bg-white">
+                                        <input class="form-check-input" type="radio" name="q_{{ q.id }}" value="A" id="q{{ q.id }}A">
+                                        <label class="form-check-label" for="q{{ q.id }}A"><strong>A.</strong> {{ q.option_a }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check p-3 rounded border bg-white">
+                                        <input class="form-check-input" type="radio" name="q_{{ q.id }}" value="B" id="q{{ q.id }}B">
+                                        <label class="form-check-label" for="q{{ q.id }}B"><strong>B.</strong> {{ q.option_b }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check p-3 rounded border bg-white">
+                                        <input class="form-check-input" type="radio" name="q_{{ q.id }}" value="C" id="q{{ q.id }}C">
+                                        <label class="form-check-label" for="q{{ q.id }}C"><strong>C.</strong> {{ q.option_c }}</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check p-3 rounded border bg-white">
+                                        <input class="form-check-input" type="radio" name="q_{{ q.id }}" value="D" id="q{{ q.id }}D">
+                                        <label class="form-check-label" for="q{{ q.id }}D"><strong>D.</strong> {{ q.option_d }}</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-zpps btn-lg" onclick="return confirm('Submit test?')">
+                            <i class="bi bi-send-fill me-2"></i>Submit Test
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+let mins = {{ test.duration_minutes }}, secs = 0;
+const timer = document.getElementById('timer');
+const interval = setInterval(() => {
+    if (secs === 0) { if (mins === 0) { clearInterval(interval); document.getElementById('testForm').submit(); return; } mins--; secs = 59; }
+    else secs--;
+    timer.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')} left`;
+    if (mins < 5) timer.className = 'badge bg-danger';
+}, 1000);
+</script>
+{% endblock %}

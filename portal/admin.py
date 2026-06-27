@@ -1,0 +1,21 @@
+from django.contrib import admin
+from .models import *
+
+admin.site.register(Class)
+admin.site.register(Teacher)
+admin.site.register(Student)
+admin.site.register(Parent)
+admin.site.register(Subject)
+admin.site.register(Attendance)
+admin.site.register(ExamType)
+admin.site.register(Mark)
+admin.site.register(Timetable)
+admin.site.register(Fee)
+admin.site.register(Notice)
+admin.site.register(Book)
+admin.site.register(BookIssue)
+admin.site.register(Homework)
+admin.site.register(ClassTest)
+admin.site.register(Question)
+admin.site.register(TestAttempt)
+admin.site.register(StudentAnswer)

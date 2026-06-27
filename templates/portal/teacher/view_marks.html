@@ -1,0 +1,45 @@
+{% extends 'portal/base.html' %}
+{% block title %}View Marks{% endblock %}
+{% block page_title %}View Marks{% endblock %}
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header py-3">Filter by Student</div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label fw-semibold">Student</label>
+                <select name="student" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Select Student --</option>
+                    {% for c in classes %}
+                    <optgroup label="{{ c }}">
+                        {% for s in c.student_set.all %}
+                        <option value="{{ s.id }}">{{ s.user.get_full_name }} ({{ s.roll_number }})</option>
+                        {% endfor %}
+                    </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+{% if marks %}
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th>Subject</th><th>Exam</th><th>Marks</th><th>%</th><th>Grade</th></tr></thead>
+            <tbody>
+                {% for m in marks %}
+                <tr>
+                    <td><strong>{{ m.subject.name }}</strong></td>
+                    <td>{{ m.exam_type }}</td>
+                    <td>{{ m.marks_obtained }}/{{ m.max_marks }}</td>
+                    <td>{{ m.percentage }}%</td>
+                    <td><span class="badge bg-{% if m.grade == 'A+' or m.grade == 'A' %}success{% elif m.grade == 'F' %}danger{% else %}warning text-dark{% endif %}">{{ m.grade }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

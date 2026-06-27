@@ -1,0 +1,86 @@
+{% extends 'portal/base.html' %}
+{% block title %}Progress Report{% endblock %}
+{% block page_title %}Progress Report{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="mb-0">{{ student.user.get_full_name }} - Progress Report</h5>
+        <small class="text-muted">{{ student.student_class }} | Roll: {{ student.roll_number }}</small>
+    </div>
+    <button onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer me-2"></i>Print</button>
+</div>
+
+<!-- Attendance Summary -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card" style="background:linear-gradient(135deg,#1a7a3e,#27ae60)">
+            <i class="bi bi-calendar-check stat-icon"></i>
+            <h3>{{ att_pct }}%</h3><p>Attendance</p>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card" style="background:linear-gradient(135deg,#0d6efd,#4d9fff)">
+            <i class="bi bi-check-circle stat-icon"></i>
+            <h3>{{ present_days }}/{{ total_days }}</h3><p>Days Present</p>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card" style="background:linear-gradient(135deg,#fd7e14,#ffaa5c)">
+            <i class="bi bi-book stat-icon"></i>
+            <h3>{{ subjects.count }}</h3><p>Subjects</p>
+        </div>
+    </div>
+</div>
+
+{% if att_pct < 75 %}
+<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Attendance below 75% - Improvement required!</div>
+{% endif %}
+
+<!-- Marks Table -->
+{% for exam_name, subject_marks in marks_data.items %}
+<div class="card mb-4">
+    <div class="card-header py-3"><i class="bi bi-clipboard-data me-2"></i>{{ exam_name }}</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th>Subject</th><th>Marks Obtained</th><th>Max Marks</th><th>Percentage</th><th>Grade</th><th>Performance</th></tr>
+                </thead>
+                <tbody>
+                    {% for sub_name, data in subject_marks.items %}
+                    <tr>
+                        <td><strong>{{ sub_name }}</strong></td>
+                        {% if data %}
+                        <td>{{ data.marks }}</td>
+                        <td>{{ data.max }}</td>
+                        <td>{{ data.pct }}%</td>
+                        <td>
+                            <span class="badge bg-{% if data.grade == 'A+' or data.grade == 'A' %}success{% elif data.grade == 'F' %}danger{% else %}warning text-dark{% endif %}">{{ data.grade }}</span>
+                        </td>
+                        <td>
+                            <div class="progress" style="height:8px;width:100px;">
+                                <div class="progress-bar bg-{% if data.pct >= 75 %}success{% elif data.pct >= 50 %}warning{% else %}danger{% endif %}" style="width:{{ data.pct }}%"></div>
+                            </div>
+                        </td>
+                        {% else %}
+                        <td colspan="5" class="text-muted small">Not yet entered</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="alert alert-info">No exam data available yet.</div>
+{% endfor %}
+
+<style>
+@media print {
+    .sidebar, .topbar, .btn, .alert { display: none !important; }
+    .main-content { margin-left: 0 !important; }
+    .page-body { padding: 0 !important; }
+}
+</style>
+{% endblock %}

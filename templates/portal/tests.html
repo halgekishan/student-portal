@@ -1,0 +1,48 @@
+{% extends 'portal/base.html' %}
+{% block title %}Class Tests{% endblock %}
+{% block page_title %}Class Tests{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h6 class="mb-0 text-muted">Available Tests</h6>
+    {% if role == 'teacher' or role == 'admin' %}
+    <a href="{% url 'create_test' %}" class="btn btn-zpps"><i class="bi bi-plus-lg me-2"></i>Create Test</a>
+    {% endif %}
+</div>
+<div class="row g-4">
+    {% for test in tests %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="badge bg-primary">{{ test.subject }}</span>
+                    <span class="badge bg-{% if test.is_active %}success{% else %}secondary{% endif %}">{% if test.is_active %}Active{% else %}Inactive{% endif %}</span>
+                </div>
+                <h5 class="card-title">{{ test.title }}</h5>
+                <p class="card-text text-muted small">
+                    <i class="bi bi-building me-1"></i>{{ test.student_class }}<br>
+                    <i class="bi bi-clock me-1"></i>Duration: {{ test.duration_minutes }} mins<br>
+                    <i class="bi bi-trophy me-1"></i>Total Marks: {{ test.total_marks }}<br>
+                    <i class="bi bi-question-circle me-1"></i>{{ test.questions.count }} Questions
+                </p>
+            </div>
+            <div class="card-footer bg-white">
+                {% if role == 'student' %}
+                    {% if test.attempted %}
+                    <span class="btn btn-sm btn-secondary w-100 disabled">Already Attempted</span>
+                    {% else %}
+                    <a href="{% url 'take_test' test.pk %}" class="btn btn-zpps btn-sm w-100"><i class="bi bi-play-fill me-1"></i>Start Test</a>
+                    {% endif %}
+                {% elif role == 'teacher' %}
+                <a href="{% url 'add_questions' test.pk %}" class="btn btn-sm btn-outline-primary w-100"><i class="bi bi-pencil me-1"></i>Edit Questions</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center p-5">
+        <i class="bi bi-clipboard-x text-muted" style="font-size:3rem;"></i>
+        <p class="text-muted mt-3">No tests available.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

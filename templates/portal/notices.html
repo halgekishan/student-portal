@@ -1,0 +1,45 @@
+{% extends 'portal/base.html' %}
+{% block title %}Notice Board{% endblock %}
+{% block page_title %}Notice Board{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h6 class="mb-0 text-muted">{{ notices.count }} active notice(s)</h6>
+    {% if role == 'admin' or role == 'teacher' %}
+    <a href="{% url 'add_notice' %}" class="btn btn-zpps"><i class="bi bi-plus-lg me-2"></i>Post Notice</a>
+    {% endif %}
+</div>
+{% for notice in notices %}
+<div class="card mb-3 priority-{{ notice.priority }}">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-{% if notice.priority == 'H' %}danger{% elif notice.priority == 'M' %}warning text-dark{% else %}success{% endif %}">
+                        {% if notice.priority == 'H' %}🔴 High{% elif notice.priority == 'M' %}🟡 Medium{% else %}🟢 Low{% endif %}
+                    </span>
+                    <span class="badge bg-light text-dark">{{ notice.get_audience_display }}</span>
+                    <small class="text-muted">{{ notice.posted_on|date:"d M Y, H:i" }}</small>
+                </div>
+                <h5 class="mb-2">{{ notice.title }}</h5>
+                <p class="text-muted mb-2">{{ notice.content }}</p>
+                {% if notice.attachment %}
+                <a href="{{ notice.attachment.url }}" class="btn btn-sm btn-outline-primary" download><i class="bi bi-paperclip me-1"></i>Attachment</a>
+                {% endif %}
+                {% if notice.valid_till %}<small class="text-muted ms-2"><i class="bi bi-clock me-1"></i>Valid till: {{ notice.valid_till }}</small>{% endif %}
+            </div>
+            {% if role == 'admin' %}
+            <form method="post" action="{% url 'delete_notice' notice.pk %}" class="ms-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete notice?')"><i class="bi bi-trash"></i></button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="text-center p-5">
+    <i class="bi bi-bell-slash text-muted" style="font-size:3rem;"></i>
+    <p class="text-muted mt-3">No notices at this time.</p>
+</div>
+{% endfor %}
+{% endblock %}
