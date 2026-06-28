@@ -68,6 +68,13 @@ urlpatterns = [
     # Profile
     path('profile/', views.student_profile, name='student_profile'),
 
+
+    # Parent Management
+    path('parents/', views.manage_parents, name='manage_parents'),
+    path('parents/add/', views.add_parent, name='add_parent'),
+    path('parents/<int:pk>/edit/', views.edit_parent, name='edit_parent'),
+    path('parents/<int:pk>/delete/', views.delete_parent, name='delete_parent'),
+
     # Progress Reports
     path('report/my/', views.progress_report, name='progress_report'),
     path('report/student/<int:student_id>/', views.progress_report, name='student_progress'),

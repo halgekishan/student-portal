@@ -18,8 +18,6 @@
                     <div class="card mb-3 border-0 bg-light">
                         <div class="card-body">
                             <p class="fw-semibold mb-3"><span class="badge bg-primary me-2">Q{{ forloop.counter }}</span>{{ q.question_text }} <small class="text-muted">({{ q.marks }} mark)</small></p>
-                            {% for opt, label in q.option_a|zip_options:q %}
-                            {% endfor %}
                             <div class="row g-2">
                                 <div class="col-md-6">
                                     <div class="form-check p-3 rounded border bg-white">

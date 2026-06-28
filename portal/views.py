@@ -5,7 +5,8 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models import Avg, Count, Q
-
+from django.http import JsonResponse
+import json
 from .models import *
 from .forms import *
 
@@ -758,3 +759,80 @@ def all_students_progress(request):
     return render(request, 'portal/admin/all_progress.html', {
         'classes': classes, 'students': students, 'selected_class': selected_class_id
     })
+
+
+# ================== PARENT MANAGEMENT (Admin) ==================
+
+@login_required
+def manage_parents(request):
+    parents = Parent.objects.select_related('user', 'student__user', 'student__student_class').all()
+    return render(request, 'portal/admin/parents.html', {'parents': parents})
+
+
+@login_required
+def add_parent(request):
+    from .forms import ParentForm
+    form = ParentForm()
+    if request.method == 'POST':
+        form = ParentForm(request.POST)
+        if form.is_valid():
+            student = form.cleaned_data['student']
+            # Auto username = PAR + roll_number
+            username = f'PAR{student.roll_number}'
+            # If user already exists, reuse
+            if not User.objects.filter(username=username).exists():
+                user = User.objects.create_user(
+                    username=username,
+                    first_name=form.cleaned_data['first_name'],
+                    last_name=form.cleaned_data['last_name'],
+                    email=form.cleaned_data.get('email', ''),
+                    password=form.cleaned_data.get('password') or 'parent123'
+                )
+            else:
+                user = User.objects.get(username=username)
+                user.first_name = form.cleaned_data['first_name']
+                user.last_name = form.cleaned_data['last_name']
+                user.save()
+            parent = form.save(commit=False)
+            parent.user = user
+            parent.save()
+            messages.success(request, f'Parent {user.get_full_name()} added! Login: {username} / parent123')
+            return redirect('manage_parents')
+    return render(request, 'portal/admin/parent_form.html', {'form': form, 'title': 'Add Parent'})
+
+
+@login_required
+def edit_parent(request, pk):
+    from .forms import ParentForm
+    parent = get_object_or_404(Parent, pk=pk)
+    initial = {
+        'first_name': parent.user.first_name,
+        'last_name': parent.user.last_name,
+        'email': parent.user.email,
+    }
+    form = ParentForm(instance=parent, initial=initial)
+    if request.method == 'POST':
+        form = ParentForm(request.POST, instance=parent)
+        if form.is_valid():
+            parent.user.first_name = form.cleaned_data['first_name']
+            parent.user.last_name = form.cleaned_data['last_name']
+            parent.user.email = form.cleaned_data.get('email', '')
+            if form.cleaned_data.get('password'):
+                parent.user.set_password(form.cleaned_data['password'])
+            parent.user.save()
+            form.save()
+            messages.success(request, 'Parent updated!')
+            return redirect('manage_parents')
+    return render(request, 'portal/admin/parent_form.html', {
+        'form': form, 'title': 'Edit Parent', 'parent': parent
+    })
+
+
+@login_required
+def delete_parent(request, pk):
+    parent = get_object_or_404(Parent, pk=pk)
+    if request.method == 'POST':
+        parent.user.delete()
+        messages.success(request, 'Parent deleted!')
+        return redirect('manage_parents')
+    return render(request, 'portal/confirm_delete.html', {'obj': parent, 'type': 'Parent'})

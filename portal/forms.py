@@ -193,3 +193,19 @@ class BookForm(forms.ModelForm):
             'available_copies': forms.NumberInput(attrs={'class': 'form-control'}),
             'publisher': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+
+class ParentForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}), required=False)
+
+    class Meta:
+        model = Parent
+        fields = ['student', 'relation', 'phone']
+        widgets = {
+            'student': forms.Select(attrs={'class': 'form-select'}),
+            'relation': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+        }
